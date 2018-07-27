@@ -16,7 +16,8 @@ def reprojection(geo_dem):
     :param dem:
     :return:
     """
-    cmd = "gdalwarp -t_srs '+proj=utm +zone=43N +datum=WGS84' -dstnodata -9999 -overwrite {} {}_toUTM.tif".format(geo_dem, geo_dem[:-4])
+    cmd = "gdalwarp -t_srs '+proj=utm +zone=43N +datum=WGS84' -dstnodata -9999 " \
+          "-overwrite {} {}_toUTM.tif".format(geo_dem, geo_dem[:-4])
     os.system(cmd)
 
 def resampling(utm_dem):
@@ -25,24 +26,19 @@ def resampling(utm_dem):
     :param utm_dem:
     :return:
     """
-    cmd = "gdal_translate -tr 500 500 -r cubic -a_nodata 0 -stats {} {}_resamp.tif".format(utm_dem, utm_dem[:-4])
+    cmd = "gdal_translate -tr 500 500 -r cubic -a_nodata 0 " \
+          "-stats {} {}_resamp.tif".format(utm_dem, utm_dem[:-4])
     os.system(cmd)
 
 
 def img2array(img):
     """
-
     read dems to array by gdal
-
     :param imgfn path of geotiff
-
     :return narray of geotiff
-
     """
-
     img_data = gdal.Open(img)
     img_array = img_data.ReadAsArray()
-
     return img_array
 
 def read_tif_metadata(tifffile):
@@ -60,7 +56,6 @@ def read_tif_metadata(tifffile):
 
 def array2rasterUTM(newRasterfn, panTransform, array):
     """
-
     :param newRasterfn:
     :param panTransform: imggt
     :param array:
