@@ -33,7 +33,8 @@ def draw_hist(impath):
     cv2.waitKey(0)
     pass
 
-def rgbtohsi(rgb_lwpImg):
+
+def rgb2hsi(rgb_lwpImg):
     """
 
     :param rgb_lwpImg: arrays of input RGB Image
@@ -76,8 +77,57 @@ def rgbtohsi(rgb_lwpImg):
             hsi_lwpImg[i, j, 2] = I*255
     return hsi_lwpImg
 
-def neibour_8_grab():
-    pass
+
+def band_9_neibour_layers(bandarr):
+    """
+    input band, return stacked layers of pixels' 9-neighbourhood
+    :param bandarr:
+    :return:
+    """
+    ul = np.zeros((bandarr.shape[0], bandarr.shape[1], 1), dtype="")
+    up = np.zeros_like(ul)
+    ur = np.zeros_like(ul)
+    left = np.zeros_like(ul)
+    right = np.zeros_like(ul)
+    dl = np.zeros_like(ul)
+    down = np.zeros_like(ul)
+    dr = np.zeros_like(ul)
+    for i in range(bandarr.shape[0]):
+        for j in range(bandarr.shape[1]):
+            if i < 1 or j < 1:
+                ul[i, j] = -1
+            else:
+                ul[i, j] = bandarr[i - 1, j - 1]
+            if i < 1:
+                up[i, j] = -1
+            else:
+                up[i, j] = bandarr[i - 1, j]
+            if j < 1:
+                left[i, j] = -1
+            else:
+                left[i, j] = bandarr[i, j - 1]
+            if j < 1 or i > bandarr.shape[0]-1:
+                dl[i, j] = -1
+            else:
+                dl[i, j] = bandarr[i + 1, j - 1]
+            if i < 1 or j > bandarr.shape[1]-1:
+                ur[i, j] = -1
+            else:
+                ur[i, j] = bandarr[i - 1, j + 1]
+            if j > bandarr.shape[1]-1:
+                right[i, j] = -1
+            else:
+                right[i, j] = bandarr[i, j+1]
+            if i > bandarr.shape[0]-1:
+                down[i, j] = -1
+            else:
+                down[i, j] = bandarr[i + 1, j]
+            if i > bandarr.shape[0]-1 or j > bandarr.shape[1]-1:
+                dr[i, j] = -1
+            else:
+                dr[i, j] = bandarr[i + 1, j + 1]
+    return np.stack((bandarr, ul, up, ur, left, right, dl, down, dr), axis=2)
+
 
 def neibour_4_grab():
     pass
@@ -110,9 +160,9 @@ def sobel(src, kernel_size):
     """
     if kernel_size != 1 or kernel_size != 3 or kernel_size != 5 or kernel_size != 7:
         print("INPUT Params ERROR: kernel_size must be 1 or 3 or 5 or 7!")
-    grad_x = cv2.Sobel(src,-1, 1, 0, ksize=kernel_size)
-    grad_y = cv2.Sobel(src,-1, 0, 1, ksize=kernel_size)
-    grad = cv2.Sobel(src,-1, 1, 1, ksize=kernel_size)
+    grad_x = cv2.Sobel(src, -1, 1, 0, ksize=kernel_size)
+    grad_y = cv2.Sobel(src, -1, 0, 1, ksize=kernel_size)
+    grad = cv2.Sobel(src, -1, 1, 1, ksize=kernel_size)
     grad_bi = math.sqrt(math.pow(grad_x, 2) + math.pow(grad_y, 2))
     if grad == grad_bi:
         print("got gradiation without seperate by x and y!")
