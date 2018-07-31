@@ -85,7 +85,7 @@ def band_9_neibour_layers_ignoreedge(bandarr):
     :return:
     """
     pass
-    ul = np.zeros((bandarr.shape[0], bandarr.shape[1]), dtype='f')
+    ul = np.zeros((bandarr.shape[0]-2, bandarr.shape[1]-2), dtype='f')
     up = np.zeros_like(ul)
     ur = np.zeros_like(ul)
     left = np.zeros_like(ul)
@@ -191,13 +191,15 @@ def sobel(src, kernel_size):
     :param:kernel_size: 1 3 5 7
     :return: output gradients
     """
-    if kernel_size != 1 or kernel_size != 3 or kernel_size != 5 or kernel_size != 7:
+    if kernel_size != 1 and kernel_size != 3 and kernel_size != 5 and kernel_size != 7:
         print("INPUT Params ERROR: kernel_size must be 1 or 3 or 5 or 7!")
     grad_x = cv2.Sobel(src, -1, 1, 0, ksize=kernel_size)
     grad_y = cv2.Sobel(src, -1, 0, 1, ksize=kernel_size)
     grad = cv2.Sobel(src, -1, 1, 1, ksize=kernel_size)
-    grad_bi = math.sqrt(math.pow(grad_x, 2) + math.pow(grad_y, 2))
-    if grad == grad_bi:
+
+    grad_bi = np.sqrt(np.power(grad_x, 2) + np.power(grad_y, 2))
+
+    if grad.all() == grad_bi.all():
         print("got gradiation without seperate by x and y!")
         return grad
     else:
