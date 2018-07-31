@@ -78,13 +78,44 @@ def rgb2hsi(rgb_lwpImg):
     return hsi_lwpImg
 
 
+def band_9_neibour_layers_ignoreedge(bandarr):
+    """
+    drop edge pixels for faster diff map generation
+    :param bandarr:
+    :return:
+    """
+    pass
+    ul = np.zeros((bandarr.shape[0], bandarr.shape[1]), dtype='f')
+    up = np.zeros_like(ul)
+    ur = np.zeros_like(ul)
+    left = np.zeros_like(ul)
+    right = np.zeros_like(ul)
+    dl = np.zeros_like(ul)
+    down = np.zeros_like(ul)
+    dr = np.zeros_like(ul)
+    for i in range(1, bandarr.shape[0]-1):
+        for j in range(1, bandarr.shape[1]-1):
+            ul[i, j] = bandarr[i - 1, j - 1]
+            up[i, j] = bandarr[i - 1, j]
+            left[i, j] = bandarr[i, j - 1]
+            dl[i, j] = bandarr[i + 1, j - 1]
+            ur[i, j] = bandarr[i - 1, j + 1]
+            right[i, j] = bandarr[i, j+1]
+            down[i, j] = bandarr[i + 1, j]
+            dr[i, j] = bandarr[i + 1, j + 1]
+    #print(np.stack((bandarr, ul, up, ur, left, right, dl, down, dr)).shape)
+    returnarr = np.moveaxis(np.stack((bandarr, ul, up, ur, left, right, dl, down, dr)), 0, 2)
+    print(returnarr.shape)
+    return returnarr
+
 def band_9_neibour_layers(bandarr):
     """
     input band, return stacked layers of pixels' 9-neighbourhood
     :param bandarr:
     :return:
     """
-    ul = np.zeros((bandarr.shape[0], bandarr.shape[1], 1), dtype="")
+    #print(bandarr.shape[0], bandarr.shape[1])
+    ul = np.zeros((bandarr.shape[0], bandarr.shape[1]), dtype='f')
     up = np.zeros_like(ul)
     ur = np.zeros_like(ul)
     left = np.zeros_like(ul)
@@ -106,28 +137,30 @@ def band_9_neibour_layers(bandarr):
                 left[i, j] = -1
             else:
                 left[i, j] = bandarr[i, j - 1]
-            if j < 1 or i > bandarr.shape[0]-1:
+            if j < 1 or i == bandarr.shape[0]-1:
                 dl[i, j] = -1
             else:
                 dl[i, j] = bandarr[i + 1, j - 1]
-            if i < 1 or j > bandarr.shape[1]-1:
+            if i < 1 or j == bandarr.shape[1]-1:
                 ur[i, j] = -1
             else:
                 ur[i, j] = bandarr[i - 1, j + 1]
-            if j > bandarr.shape[1]-1:
+            if j == bandarr.shape[1]-1:
                 right[i, j] = -1
             else:
                 right[i, j] = bandarr[i, j+1]
-            if i > bandarr.shape[0]-1:
+            if i == bandarr.shape[0]-1:
                 down[i, j] = -1
             else:
                 down[i, j] = bandarr[i + 1, j]
-            if i > bandarr.shape[0]-1 or j > bandarr.shape[1]-1:
+            if i == bandarr.shape[0]-1 or j == bandarr.shape[1]-1:
                 dr[i, j] = -1
             else:
                 dr[i, j] = bandarr[i + 1, j + 1]
-    return np.stack((bandarr, ul, up, ur, left, right, dl, down, dr), axis=2)
-
+    #print(np.stack((bandarr, ul, up, ur, left, right, dl, down, dr)).shape)
+    returnarr = np.moveaxis(np.stack((bandarr, ul, up, ur, left, right, dl, down, dr)), 0, 2)
+    print(returnarr.shape)
+    return returnarr
 
 def neibour_4_grab():
     pass

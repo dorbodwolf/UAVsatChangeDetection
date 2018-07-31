@@ -16,7 +16,7 @@ def getPCC(diff_map):
     pass
 
 
-def diff_map(imsatpath, imuavpath, w = 0):
+def diff_map(imsatpath, imuavpath, w=0):
     """
     input imuav and imsat, return different map
     :param imsatpath:
@@ -29,9 +29,10 @@ def diff_map(imsatpath, imuavpath, w = 0):
               "diff_map(imsatpath, imuavpath, w)\n need param w of search box,"
               " its must be odd like 1, 3, 5, 7, 9,.etc.")
         sys.exit(1)
-    imsatarr, imuavarr = Image.img2array(imsatpath), Image.img2array(imuavpath)
+    imsatarr, imuavarr = np.moveaxis(Image.img2array(imsatpath), 0, 2), np.moveaxis(Image.img2array(imuavpath), 0, 2)
+    print(imsatarr.shape, imuavarr.shape)
     imsat_desc, imuav_desc = descriptor(imsatarr), descriptor(imuavarr)
-    diffarr = np.zeros((imuavarr.shape[0], imuavarr.shape[1]), dtype="")
+    diffarr = np.zeros((imuavarr.shape[0], imuavarr.shape[1]), dtype='f')
     for i in range(imuav_desc.shape[0]):
         for j in range(imuav_desc.shape[1]):
             xmin, xmax = int(j-(w-1)/2), int(j+(w-1)/2+1)
@@ -53,10 +54,11 @@ def descriptor(rgbarr):
     :param rgbarr:
     :return:
     """
-    desc = np.zeros_like((rgbarr.shape[0], rgbarr.shape[1], 36), dtype="")
+    desc = np.zeros((rgbarr.shape[0], rgbarr.shape[1], 36), dtype='f')
+    print(desc.shape)
     desc[:, :, 0:9] = Image_process.band_9_neibour_layers(rgbarr[:, :, 0])
     desc[:, :, 9:18] = Image_process.band_9_neibour_layers(rgbarr[:, :, 1])
-    desc[:, :, 18:26] = Image_process.band_9_neibour_layers(rgbarr[:, :, 2])
+    desc[:, :, 18:27] = Image_process.band_9_neibour_layers(rgbarr[:, :, 2])
     desc[:, :, 27:36] = getIG(rgbarr[:, :, 0]*0.299 + rgbarr[:, :, 1]*0.587 + rgbarr[:, :, 2]*0.114)
     return desc
 
