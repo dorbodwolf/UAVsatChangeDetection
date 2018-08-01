@@ -115,7 +115,9 @@ def band_9_neibour_layers(bandarr):
     :return:
     """
     #print(bandarr.shape[0], bandarr.shape[1])
-    ul = np.zeros((bandarr.shape[0], bandarr.shape[1]), dtype='f')
+    if isinstance(bandarr, float):
+        bandarr = bandarr.astype('i')
+    ul = np.zeros((bandarr.shape[0], bandarr.shape[1]), dtype='i')
     up = np.zeros_like(ul)
     ur = np.zeros_like(ul)
     left = np.zeros_like(ul)
@@ -157,10 +159,7 @@ def band_9_neibour_layers(bandarr):
                 dr[i, j] = -1
             else:
                 dr[i, j] = bandarr[i + 1, j + 1]
-    #print(np.stack((bandarr, ul, up, ur, left, right, dl, down, dr)).shape)
-    returnarr = np.moveaxis(np.stack((bandarr, ul, up, ur, left, right, dl, down, dr)), 0, 2)
-    print(returnarr.shape)
-    return returnarr
+    return np.moveaxis(np.stack((bandarr, ul, up, ur, left, right, dl, down, dr)), 0, 2)
 
 def neibour_4_grab():
     pass
@@ -193,15 +192,18 @@ def sobel(src, kernel_size):
     """
     if kernel_size != 1 and kernel_size != 3 and kernel_size != 5 and kernel_size != 7:
         print("INPUT Params ERROR: kernel_size must be 1 or 3 or 5 or 7!")
-    grad_x = cv2.Sobel(src, -1, 1, 0, ksize=kernel_size)
-    grad_y = cv2.Sobel(src, -1, 0, 1, ksize=kernel_size)
-    grad = cv2.Sobel(src, -1, 1, 1, ksize=kernel_size)
+    grad_x = cv2.Sobel(src, cv2.CV_64F, 1, 0, ksize=kernel_size)
+    grad_y = cv2.Sobel(src, cv2.CV_64F, 0, 1, ksize=kernel_size)
+    grad = cv2.Sobel(src, cv2.CV_64F, 1, 1, ksize=kernel_size)
+    grad_abs = np.absolute(grad)
+    grad_8u = np.uint8(grad_abs)
 
     grad_bi = np.sqrt(np.power(grad_x, 2) + np.power(grad_y, 2))
 
-    if grad.all() == grad_bi.all():
+    if grad_8u.all() == grad_bi.all():
         print("got gradiation without seperate by x and y!")
-        return grad
+        print(np.max(grad), np.max(grad_8u))
+        return grad_8u
     else:
         print("need seperately x and y grad to generate total gradiation!")
         return grad_bi
