@@ -7,16 +7,18 @@
 # @Software: PyCharm Community Edition
 
 import cv2
-import math
 import numpy as np
+import Image
+
 
 def draw_hist(impath):
     """
     :param impath:
     :return:
     """
-    img = cv2.imread(impath)
-    h = np.zeros((300, 256, 1))
+    img = Image.img2array(impath)
+    #img = cv2.imread(impath)
+    h = np.zeros((img.shape[0], img.shape[1], 1))
 
     bins = np.arange(256).reshape(256, 1)
     color = [(255, 0, 0)]
@@ -85,7 +87,7 @@ def band_9_neibour_layers_ignoreedge(bandarr):
     :return:
     """
     pass
-    ul = np.zeros((bandarr.shape[0]-2, bandarr.shape[1]-2), dtype='f')
+    ul = np.zeros((bandarr.shape[0], bandarr.shape[1]), dtype='f')
     up = np.zeros_like(ul)
     ur = np.zeros_like(ul)
     left = np.zeros_like(ul)
@@ -116,6 +118,7 @@ def band_9_neibour_layers(bandarr):
     """
     #print(bandarr.shape[0], bandarr.shape[1])
     if isinstance(bandarr, float):
+        print("band_9_neibour_layers:band datatype changed to int!")
         bandarr = bandarr.astype('i')
     ul = np.zeros((bandarr.shape[0], bandarr.shape[1]), dtype='i')
     up = np.zeros_like(ul)

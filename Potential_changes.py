@@ -12,10 +12,16 @@ import numpy as np
 import sys
 import os
 import Config
-import matplotlib.pyplot as plt
+import Visulazation as visul
 
 
 def getPCC(diff_map):
+
+    pass
+
+
+def Yuzhi_band(bandpath):
+    Image_process.draw_hist(bandpath)
     pass
 
 
@@ -44,6 +50,8 @@ def diff_map_matrix(imsatpath, imuavpath, w=0):
         sys.exit(1)
     imsatarr, imuavarr = np.moveaxis(Image.img2array(imsatpath), 0, 2), np.moveaxis(Image.img2array(imuavpath), 0, 2)
     print(imsatarr.shape, imuavarr.shape)
+    visul.visul_arr_rgb(imsatarr)
+    visul.visul_arr_rgb(imuavarr)
     imsat_desc, imuav_desc = descriptor(imsatarr), descriptor(imuavarr)
     print("features of IMUAV and IMSAT have generated successed, "
           "now compute difference maps with matrix ways!")
@@ -52,13 +60,15 @@ def diff_map_matrix(imsatpath, imuavpath, w=0):
         for j in range((w-1)/2, imuav_desc.shape[1]-(w-1)/2):
             xmin, xmax = j-(w-1)/2, j+(w-1)/2+1
             ymin, ymax = i-(w-1)/2, i+(w-1)/2+1
-            v = imsat_desc[ymin:ymax, xmin:xmax, :]
+            v = imsat_desc[ymin:ymax, xmin:xmax]
             v_2d = v.reshape((v.shape[0] * v.shape[1]), v.shape[2])
             u = imuav_desc[i, j].reshape(1, imuav_desc[i, j].shape[0])
             diffarr[i, j] = np.min(np.linalg.norm(v_2d - u, axis=1))
             #print(v.shape, v_2d.shape, u.shape, diffarr[i, j])
             #print(imuav_desc[i, j], u, diffarr[i, j])
     np.save(os.path.join(Config.data, "diffmap.npy"), diffarr)
+    imggt = Image.read_tif_metadata(imsatpath)
+    Image.array2rasterUTM(os.path.join(Config.data, "diffmap.tif"), imggt, diffarr)
     return diffarr
 
 
@@ -103,21 +113,14 @@ def descriptor(rgbarr):
     desc = np.zeros((rgbarr.shape[0], rgbarr.shape[1], 36), dtype='i')
     print(desc.shape)
 
-    desc[:, :, 0:9] = Image_process.band_9_neibour_layers(rgbarr[:, :, 0])
-    desc[:, :, 9:18] = Image_process.band_9_neibour_layers(rgbarr[:, :, 1])
-    desc[:, :, 18:27] = Image_process.band_9_neibour_layers(rgbarr[:, :, 2])
-
-    plt.imshow(desc[:, :, 20])  # plotting by columns
-    plt.gray()
-    plt.show()
+    # visul.visul_arr_rgb(rgbarr[:, :, 0])
+    desc[:, :, 0:9] = Image_process.band_9_neibour_layers_ignoreedge(rgbarr[:, :, 0])
+    desc[:, :, 9:18] = Image_process.band_9_neibour_layers_ignoreedge(rgbarr[:, :, 1])
+    desc[:, :, 18:27] = Image_process.band_9_neibour_layers_ignoreedge(rgbarr[:, :, 2])
 
     luminate = rgbarr[:, :, 0] * 0.299 + rgbarr[:, :, 1] * 0.587 + rgbarr[:, :, 2] * 0.114
     desc[:, :, 27:36] = getIG(np.uint8(luminate)) #if( sdepth == CV_16S && ddepth == CV_32F)
     print("max of IG is ", np.max(desc[:, :, 27:36]))
-
-    plt.imshow(desc[:, :, 30])  # plotting by columns
-    plt.gray()
-    plt.show()
 
     return desc
 
@@ -129,7 +132,7 @@ def getIG(lumimgarr):
     :return:stacked band layers of gradients
     """
     gradient = Image_process.sobel(lumimgarr, kernel_size=7)
-    return Image_process.band_9_neibour_layers(gradient)
+    return Image_process.band_9_neibour_layers_ignoreedge(gradient)
 
 
 if __name__ == '__main__':

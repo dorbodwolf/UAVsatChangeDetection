@@ -9,8 +9,15 @@
 import Config
 import os
 import matplotlib.pyplot as plt
-from matplotlib.pyplot import imshow
 import numpy as np
+
+
+
+def visul_arr_rgb(arr):
+    plt.imshow(arr)  # plotting by columns
+    print(np.max(arr), np.min(arr), np.std(arr))
+    plt.show()
+    pass
 
 
 def visul_npy(npy):
@@ -23,5 +30,5 @@ def visul_npy(npy):
 
 
 if __name__ == '__main__':
-    visul_npy(os.path.join(Config.data, "result\\diffmap_w21.npy"))
+    visul_npy(os.path.join(Config.data, "diffmap.npy"))
     pass

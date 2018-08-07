@@ -52,7 +52,7 @@ def read_tif_metadata(tifffile):
     print('raster geotransform coeffs:', imggt[0], imggt[1], imggt[2], imggt[3], imggt[4], imggt[5])
     band = imgds.GetRasterBand(1)
     b = band.ReadAsArray()
-    return imggt, b
+    return imggt
 
 def array2rasterUTM(newRasterfn, panTransform, array):
     """
@@ -71,7 +71,7 @@ def array2rasterUTM(newRasterfn, panTransform, array):
     outband = outRaster.GetRasterBand(1)
     outband.WriteArray(array)
     outRasterSRS = osr.SpatialReference()
-    outRasterSRS.ImportFromEPSG(32643)
+    outRasterSRS.ImportFromEPSG(32652) #utm 52n
     outRaster.SetProjection(outRasterSRS.ExportToWkt())
     outband.FlushCache()
 
